@@ -43,7 +43,23 @@ public final class Model {
     public record ReviewThread(String threadId, String comment, String reply, String commitSha) {
     }
 
-    public record WorkflowStatus(String state, String plan, String clarificationQuestions, String branch,
-                                 String mergeRequestDescription, List<ReviewThread> threads, String error) {
+    public record WorkflowStatus(String state, String workspacePath, String plan, String clarificationQuestions,
+                                 String branch, String mergeRequestDescription, List<ReviewThread> threads,
+                                 String error) {
+    }
+
+    /**
+     * A one-line view of a workflow as Temporal's visibility store sees it — enough for the UI to list
+     * what's running after a cold start, without the browser having to remember anything.
+     *
+     * @param key        ticket key (the workflow id with the "henry-" prefix stripped)
+     * @param workflowId the full Temporal workflow id
+     * @param status     Temporal's execution status: RUNNING, COMPLETED, FAILED, ...
+     * @param startTime  ISO-8601 start instant (or null)
+     * @param events     number of events in the workflow's history so far — the durable record Temporal
+     *                   replays to rebuild state; it only ever grows while the workflow runs
+     * @param state      the workflow's own phase label from its status() query (best-effort; may be null)
+     */
+    public record TaskSummary(String key, String workflowId, String status, String startTime, long events, String state) {
     }
 }

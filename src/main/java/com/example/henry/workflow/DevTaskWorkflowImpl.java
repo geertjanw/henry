@@ -67,6 +67,7 @@ public class DevTaskWorkflowImpl implements DevTaskWorkflow {
 
     // ---- workflow state (rebuilt deterministically on replay) ----
     private String state = "STARTED";
+    private String workspace;   // where the repo was cloned (set once prepareWorkspace runs)
     private String error;
     private String plan;
     private String questions;
@@ -96,6 +97,7 @@ public class DevTaskWorkflowImpl implements DevTaskWorkflow {
     private String runTask(DevTask task) {
         state = "PREPARING_WORKSPACE";
         String ws = git.prepareWorkspace(Workflow.getInfo().getWorkflowId(), task);
+        workspace = ws;   // surfaced in status() so the UI can show where the repo was cloned
 
         // 1. Plan (or reuse a plan that was already tech-reviewed)
         plan = task.plan();
@@ -238,6 +240,6 @@ public class DevTaskWorkflowImpl implements DevTaskWorkflow {
 
     @Override
     public WorkflowStatus status() {
-        return new WorkflowStatus(state, plan, questions, branch, mrDescription, List.copyOf(threads), error);
+        return new WorkflowStatus(state, workspace, plan, questions, branch, mrDescription, List.copyOf(threads), error);
     }
 }
